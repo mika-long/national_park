@@ -1,0 +1,6 @@
+.map {
+    height: 400px; /* Set the height of each map */
+    width: 800px;  /* Set the width of each map */
+    margin-bottom: 20px; /* Add spacing between maps */
+    display: inline-block;
+}
