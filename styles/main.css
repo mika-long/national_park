@@ -4,3 +4,20 @@
     margin-bottom: 20px; /* Add spacing between maps */
     display: inline-block;
 }
+
+.map-container {
+    transition: all 0.3s ease;
+}
+
+.heatmap-container {
+    transition: all 0.3s ease;
+    transform: translateX(100%);
+}
+
+.heatmap-visible {
+    transform: translateX(0);
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+}
