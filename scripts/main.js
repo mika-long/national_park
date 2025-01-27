@@ -14,11 +14,13 @@ const maps = [
 ];
 
 maps.forEach(mapConfig => {
-    const map = new NPMap.Map({
-        target: mapConfig.id,
+    const map = new NPMap({
+        div: mapConfig.id,
         center: { lat: mapConfig.center[0], lng: mapConfig.center[1] },
         zoom: mapConfig.zoom,
-        baseLayers: NPMap.Config.baselayers,
+        baseLayers: [
+            'nps-parkTiles-3857'  // This is the default NPS basemap
+        ],
         overlays: parksData
             .filter(park => {
                 if (mapConfig.id === 'map-usa') {
