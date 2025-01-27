@@ -153,10 +153,16 @@ function createHeatmap(data, container) {
         (containerWidth - margin.left - margin.right) / years.length,
         15 // Maximum cell size
     );
-    
+
+    // Define seasons (0-based month indices)
+    const seasonBreaks = [2, 5, 8, 11]; // After Feb, May, Aug, Nov
+    const seasonGapSize = cellSize * 0.2; // Size of gap between seasons
+
     // Calculate dimensions based on cell size
+    // Modify the height calculation to account for gaps
+    const totalGapsHeight = seasonGapSize * 3; // 3 gaps between 4 seasons
+    const height = (months.length * cellSize) + totalGapsHeight;
     const width = years.length * cellSize;
-    const height = months.length * cellSize;
   
     // Create SVG container
     const svg = container.append("svg")
@@ -171,10 +177,18 @@ function createHeatmap(data, container) {
         .range([0, width])
         .padding(0.05);
     
+    // Modify yScale to account for seasonal gaps
     const yScale = d3.scaleBand()
         .domain(months)
         .range([0, height])
         .padding(0.05);
+
+    // Function to adjust y-position based on seasonal gaps
+    function getAdjustedY(month) {
+        const monthIndex = month - 1;
+        const numGapsBefore = seasonBreaks.filter(breakMonth => monthIndex > breakMonth).length;
+        return yScale(month) + (numGapsBefore * seasonGapSize);
+    }
     
     // Color scale remains the same
     const colorScale = d3.scaleSequential(d3.interpolateBlues)
@@ -220,29 +234,25 @@ function createHeatmap(data, container) {
       .attr("transform", `translate(${width / 2 - legendWidth / 2},${-margin.top / 2 - legendHeight / 2})`)
       .call(legendAxis);
   
-    // Add cells
+    // Update cell positions
     svg.selectAll(".cell")
         .data(data)
         .enter()
         .append("rect")
         .attr("class", "cell")
         .attr("x", d => xScale(d.year))
-        .attr("y", d => yScale(d.month))
+        .attr("y", d => getAdjustedY(d.month))
         .attr("width", xScale.bandwidth())
         .attr("height", yScale.bandwidth())
         .attr("fill", d => colorScale(d.visitors))
         .append("title")
         .text(d => `Year: ${d.year}, Month: ${d.month}, Visitors: ${d3.format(",")(d.visitors)}`);
   
-    // Add X axis with modified tick format and rotation
+    // Add X axis with correctly adjusted position
     svg.append("g")
-        .attr("transform", `translate(0,${height})`)
+        .attr("transform", `translate(0,${height+cellSize})`) // Now positioned at the very bottom of the heatmap
         .call(d3.axisBottom(xScale)
             .tickFormat(d => {
-                // Show year if:
-                // 1. It's the first year
-                // 2. It's the last year
-                // 3. It's divisible by 5
                 if (d === years[0] || 
                     d === years[years.length - 1] || 
                     (d % 5 === 0 && d !== years[0] && d !== years[years.length - 1])) {
@@ -257,13 +267,38 @@ function createHeatmap(data, container) {
         .attr("dx", "0.8em")
         .attr("dy", "-0.5em");
     
-    // Y axis remains the same
-    svg.append("g")
-        .call(d3.axisLeft(yScale).tickFormat(d => {
-            const date = new Date(0);
-            date.setUTCMonth(d - 1);
-            return d3.timeFormat("%b")(date);
-        }));
+    // Update Y axis
+    const yAxis = d3.axisLeft(yScale)
+    .tickFormat(d => {
+        const date = new Date(0);
+        date.setUTCMonth(d - 1);
+        return d3.timeFormat("%b")(date);
+    });
+
+    // Create custom Y axis with gaps
+    const yAxisGroup = svg.append("g")
+        .attr("class", "y-axis");
+
+    // Draw y-axis lines and labels with gaps
+    months.forEach(month => {
+    const y = getAdjustedY(month);
+    
+    // Add month label
+    yAxisGroup.append("text")
+        .attr("x", -10)
+        .attr("y", y + (yScale.bandwidth() / 2))
+        .attr("text-anchor", "end")
+        .attr("dominant-baseline", "middle")
+        .text(d3.timeFormat("%b")(new Date(0, month - 1)));
+    
+    // Add tick line
+    yAxisGroup.append("line")
+        .attr("x1", -6)
+        .attr("x2", 0)
+        .attr("y1", y + (yScale.bandwidth() / 2))
+        .attr("y2", y + (yScale.bandwidth() / 2))
+        .attr("stroke", "black");
+});
   
     // Add pandemic period highlight
     if (years.includes(2020)) {
@@ -289,7 +324,7 @@ function createHeatmap(data, container) {
   
     // Axis labels
     svg.append("text")
-        .attr("transform", `translate(${width / 2},${height + margin.bottom - 10})`)
+        .attr("transform", `translate(${width / 2},${height + margin.bottom})`)
         .style("text-anchor", "middle")
         .text("Year");
  
