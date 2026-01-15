@@ -44,14 +44,14 @@
 			.append('g')
 			.attr('transform', `translate(${margin.left},${margin.top})`);
 
-		const xScale = d3.scaleBand().domain(years).range([0, width]).padding(0.05);
+		const xScale = d3.scaleBand().domain(years.map(String)).range([0, width]).padding(0.05);
 
-		const yScale = d3.scaleBand().domain(months).range([0, height]).padding(0.05);
+		const yScale = d3.scaleBand().domain(months.map(String)).range([0, height]).padding(0.05);
 
 		function getAdjustedY(month: number) {
 			const monthIndex = month - 1;
 			const numGapsBefore = seasonBreaks.filter((breakMonth) => monthIndex > breakMonth).length;
-			return yScale(month)! + numGapsBefore * seasonGapSize;
+			return yScale(String(month))! + numGapsBefore * seasonGapSize;
 		}
 
 		const colorScale = d3
@@ -76,10 +76,16 @@
 			.attr('y1', '0%')
 			.attr('y2', '0%');
 
+		const tickValues = d3.ticks(
+			d3.min(data, (d) => d.visitors)!,
+			d3.max(data, (d) => d.visitors)!,
+			5
+		);
+
 		gradient
 			.selectAll('stop')
 			.data(
-				colorScale.ticks().map((t, i, n) => ({ offset: `${(100 * i) / n.length}%`, color: colorScale(t) }))
+				tickValues.map((t, i, n) => ({ offset: `${(100 * i) / n.length}%`, color: colorScale(t) }))
 			)
 			.enter()
 			.append('stop')
@@ -108,7 +114,7 @@
 			.enter()
 			.append('rect')
 			.attr('class', 'cell')
-			.attr('x', (d) => xScale(d.year)!)
+			.attr('x', (d) => xScale(String(d.year))!)
 			.attr('y', (d) => getAdjustedY(d.month))
 			.attr('width', xScale.bandwidth())
 			.attr('height', yScale.bandwidth())
@@ -162,10 +168,10 @@
 		if (years.includes(2020)) {
 			const startMonth = 1;
 			const endMonth = 5;
-			const startX = xScale(2020)!;
-			const startY = yScale(startMonth)!;
+			const startX = xScale(String(2020))!;
+			const startY = yScale(String(startMonth))!;
 			const rectWidth = xScale.bandwidth();
-			const rectHeight = yScale(endMonth)! + yScale.bandwidth() - yScale(startMonth)!;
+			const rectHeight = yScale(String(endMonth))! + yScale.bandwidth() - yScale(String(startMonth))!;
 
 			svg
 				.append('rect')

@@ -1,3 +1,4 @@
+
 # National Parks Visitor Data Visualization
 
 An interactive visualization of visitor patterns across U.S. National Parks, showing historical visitation data from 1980-2021.
