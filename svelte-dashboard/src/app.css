@@ -1,0 +1,8 @@
+@import 'maplibre-gl/dist/maplibre-gl.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Roboto', system-ui, -apple-system, sans-serif;
+}
