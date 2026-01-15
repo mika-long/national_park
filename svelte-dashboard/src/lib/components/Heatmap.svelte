@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import * as d3 from 'd3';
 	import type { VisitData } from '$lib/types';
+	import { untrack } from 'svelte';
 
 	interface HeatmapProps {
 		data: VisitData[];
@@ -10,10 +10,17 @@
 
 	let { data, parkName }: HeatmapProps = $props();
 	let container: HTMLDivElement;
+	let mounted = false;
 
-	onMount(() => {
-		if (data.length === 0) return;
-		createHeatmap();
+	$effect(() => {
+		if (!mounted && container) {
+			mounted = true;
+		}
+	});
+
+	$effect(() => {
+		if (!mounted || data.length === 0) return;
+		untrack(() => createHeatmap());
 	});
 
 	function createHeatmap() {

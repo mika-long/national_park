@@ -1,19 +1,26 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import * as d3 from 'd3'; 
+    import * as d3 from 'd3';
     import type { VisitData } from "$lib/types";
+    import { untrack } from 'svelte';
 
     interface LineChartProps {
-        data: VisitData[]; 
-        parkName: string; 
+        data: VisitData[];
+        parkName: string;
     }
 
-    let { data, parkName }: LineChartProps = $props(); 
-    let container: HTMLDivElement; 
+    let { data, parkName }: LineChartProps = $props();
+    let container: HTMLDivElement;
+    let mounted = false;
 
-    onMount(() => {
-        if (data.length === 0) return; 
-        createLineChart(); 
+    $effect(() => {
+        if (!mounted && container) {
+            mounted = true;
+        }
+    });
+
+    $effect(() => {
+        if (!mounted || data.length === 0) return;
+        untrack(() => createLineChart());
     })
 
     function createLineChart() {

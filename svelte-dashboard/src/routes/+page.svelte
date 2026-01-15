@@ -1,10 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui/card';
-  import Heatmap from '$lib/components/Heatmap.svelte';
   import Geomap from '$lib/components/Geomap.svelte';
   import { loadVisitData, loadParkData, filterNationalParks, getVisitDataForPark } from '$lib/data-loader';
   import type { VisitData, ParkFeature } from '$lib/types';
+  import VisitorChart from '$lib/components/VisitorChart.svelte';
 
   let visitData: VisitData[] = $state([]);
   let parks: ParkFeature[] = $state([]);
@@ -89,7 +89,7 @@
           </CardHeader>
           <CardContent>
             {#if selectedParkData.length > 0}
-              <Heatmap data={selectedParkData} parkName={selectedPark?.properties.Name || ''} />
+              <VisitorChart data={selectedParkData} parkName={selectedPark?.properties.Name || ''} />
             {:else}
               <div class="h-[400px] flex items-center justify-center text-gray-500">
                 <p>No visitor data available</p>
