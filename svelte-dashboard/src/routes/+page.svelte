@@ -1,16 +1,19 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Map, MapMarker, MarkerContent, MarkerTooltip, MapControls } from '$lib/components/ui/map';
   import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui/card';
   import Heatmap from '$lib/components/Heatmap.svelte';
+  import Geomap from '$lib/components/Geomap.svelte';
   import { loadVisitData, loadParkData, filterNationalParks, getVisitDataForPark } from '$lib/data-loader';
   import type { VisitData, ParkFeature } from '$lib/types';
 
   let visitData: VisitData[] = $state([]);
   let parks: ParkFeature[] = $state([]);
   let selectedPark: ParkFeature | null = $state(null);
-  let selectedParkData: VisitData[] = $state([]);
   let loading = $state(true);
+
+  let selectedParkData = $derived(
+    selectedPark ? getVisitDataForPark(visitData, selectedPark.properties.Code) : []
+  );
 
   // Yosemite coordinates: [lng, lat]
   const yosemiteCoords: [number, number] = [-119.5383, 37.8651];
@@ -29,7 +32,7 @@
       const yosemite = parks.find(p => p.properties.Code === 'YOSE');
       if (yosemite) {
         selectedPark = yosemite;
-        selectedParkData = getVisitDataForPark(visitData, 'YOSE');
+        // selectedParkData updates automatically via $derived
       }
 
       loading = false;
@@ -41,7 +44,7 @@
 
   function handleParkClick(park: ParkFeature) {
     selectedPark = park;
-    selectedParkData = getVisitDataForPark(visitData, park.properties.Code);
+    // selectedParkData updates automatically via $derived
   }
 </script>
 
@@ -66,25 +69,7 @@
             </CardDescription>
           </CardHeader>
           <CardContent class="p-0">
-            <div class="h-[500px]">
-              <Map center={yosemiteCoords} zoom={4}>
-                <MapControls />
-                {#each parks as park}
-                  <MapMarker
-                    longitude={park.geometry.coordinates[0]}
-                    latitude={park.geometry.coordinates[1]}
-                    onclick={() => handleParkClick(park)}
-                  >
-                    <MarkerContent>
-                      <div class="relative h-3 w-3 rounded-full border-2 border-white bg-green-600 shadow-lg hover:bg-green-700 transition-colors"></div>
-                    </MarkerContent>
-                    <MarkerTooltip>
-                      {park.properties.Name}
-                    </MarkerTooltip>
-                  </MapMarker>
-                {/each}
-              </Map>
-            </div>
+            <Geomap {parks} onParkClick={handleParkClick}/>
           </CardContent>
         </Card>
 

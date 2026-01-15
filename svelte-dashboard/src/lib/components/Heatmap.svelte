@@ -3,12 +3,12 @@
 	import * as d3 from 'd3';
 	import type { VisitData } from '$lib/types';
 
-	interface Props {
+	interface HeatmapProps {
 		data: VisitData[];
 		parkName: string;
 	}
 
-	let { data, parkName }: Props = $props();
+	let { data, parkName }: HeatmapProps = $props();
 	let container: HTMLDivElement;
 
 	onMount(() => {
