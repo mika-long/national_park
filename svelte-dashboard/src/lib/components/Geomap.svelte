@@ -1,39 +1,40 @@
 <script lang="ts">
     import { Map, MapMarker, MarkerContent, MarkerTooltip, MapControls } from '$lib/components/ui/map';
-    import type { ParkFeature } from '$lib/types';
 
     interface GeomapProps {
-        parks: ParkFeature[];
+        parks: any[];
+        selectedPark?: any;
         center?: [number, number]; 
         zoom?: number; 
-        onParkClick?: (park: ParkFeature) => void; 
+        onParkClick?: (park: any) => void; 
     }
+    
     let { 
         parks,
-        center = [-119.5383, 37.8651], // default to Yosemite
+        selectedPark = null,
+        center = [-119.5383, 37.8651], 
         zoom = 4, 
         onParkClick
-     } : GeomapProps = $props(); 
-
+    } : GeomapProps = $props(); 
 </script>
 
-
-<div class="h-[500px]">
+<div class="h-full">
     <Map {center} {zoom}>
-    <MapControls />
-    {#each parks as park}
-        <MapMarker
-            longitude={park.geometry.coordinates[0]}
-            latitude={park.geometry.coordinates[1]}
-            onclick={() => onParkClick?.(park)}
-        >
-        <MarkerContent>
-            <div class="relative h-3 w-3 rounded-full border-2 border-white bg-green-600 shadow-lg hover:bg-green-700 transition-colors"></div>
-        </MarkerContent>
-        <MarkerTooltip>
-            {park.properties.Name}
-        </MarkerTooltip>
-        </MapMarker>
-    {/each}
+        <MapControls />
+        
+        {#each parks as park}
+            <MapMarker longitude={park.long} latitude={park.lat}>
+                <MarkerContent>
+                    <button 
+                        onclick={() => onParkClick?.(park)}
+                        class="rounded-full w-3 h-3 {selectedPark?.Code === park.Code ? 'bg-red-500' : 'bg-blue-500'} hover:scale-125 transition-transform"
+                    ></button>
+                </MarkerContent>
+                <MarkerTooltip>
+                    <div class="font-semibold">{park.Name}</div>
+                    <div class="text-sm text-gray-600">{park.Code}</div>
+                </MarkerTooltip>
+            </MapMarker>
+        {/each}
     </Map>
 </div>

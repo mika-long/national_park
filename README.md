@@ -3,6 +3,8 @@
 
 An interactive visualization of visitor patterns across U.S. National Parks, showing historical visitation data from 1980-2021.
 
+Rewrote using `Svelte`, `mapcn-svelte`, `shadcn-svelte`, as well as `Svelteplot`. 
+
 ## Features
 - Interactive maps for Mainland USA, Hawaii, and Alaska
 - Heatmap visualizations showing visitor patterns

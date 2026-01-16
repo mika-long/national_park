@@ -1,39 +1,42 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui/card';
   import Geomap from '$lib/components/Geomap.svelte';
-  import { loadVisitData, loadParkData, filterNationalParks, getVisitDataForPark } from '$lib/data-loader';
-  import type { VisitData, ParkFeature } from '$lib/types';
   import VisitorChart from '$lib/components/VisitorChart.svelte';
+  import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui/card';
+  import * as d3 from 'd3';
 
-  let visitData: VisitData[] = $state([]);
-  let parks: ParkFeature[] = $state([]);
-  let selectedPark: ParkFeature | null = $state(null);
+  let parks: any[] = $state.raw([]);
+  let visitData: any[] = $state.raw([]);
+  let selectedPark: any = $state(null);
   let loading = $state(true);
 
+  // Filtered data for selected park
   let selectedParkData = $derived(
-    selectedPark ? getVisitDataForPark(visitData, selectedPark.properties.Code) : []
+    selectedPark 
+      ? visitData.filter(d => d.UnitCode === selectedPark.Code)
+      : []
   );
-
-  // Yosemite coordinates: [lng, lat]
-  const yosemiteCoords: [number, number] = [-119.5383, 37.8651];
 
   onMount(async () => {
     try {
-      const [visitDataResult, parkDataResult] = await Promise.all([
-        loadVisitData(),
-        loadParkData()
+      const [parksResponse, visitsResponse] = await Promise.all([
+        fetch('/data/clean_park.csv'),
+        fetch('/data/clean_visit.csv')
       ]);
 
-      visitData = visitDataResult;
-      parks = filterNationalParks(parkDataResult);
+      const parksCsvText = await parksResponse.text();
+      parks = d3.csvParse(parksCsvText, d3.autoType);
+      
+      const csvText = await visitsResponse.text();
+      visitData = d3.csvParse(csvText, d3.autoType);
+      
+      // Debug: Check column names and first row
+      console.log('Visit data columns:', Object.keys(visitData[0] || {}));
+      console.log('Visit data first row:', visitData[0]);
 
-      // Default to Yosemite
-      const yosemite = parks.find(p => p.properties.Code === 'YOSE');
-      if (yosemite) {
-        selectedPark = yosemite;
-        // selectedParkData updates automatically via $derived
-      }
+      // Default to first park (or Yosemite if available)
+      const yosemite = parks.find(p => p.Code === 'YOSE');
+      selectedPark = yosemite || parks[0];
 
       loading = false;
     } catch (error) {
@@ -42,15 +45,17 @@
     }
   });
 
-  function handleParkClick(park: ParkFeature) {
+  // $inspect(parks); 
+  // $inspect(visitData); 
+
+  function handleParkClick(park: any) {
     selectedPark = park;
-    // selectedParkData updates automatically via $derived
   }
 </script>
 
 <div class="min-h-screen bg-gray-50 p-8">
   <div class="container mx-auto max-w-7xl">
-    <h1 class="text-4xl font-bold mb-8">National Parks Dashboard</h1>
+    <h1 class="text-4xl font-bold mb-8">National Parks Visit Data Dashboard</h1>
 
     {#if loading}
       <Card>
@@ -68,20 +73,20 @@
               {parks.length} parks loaded • Click a marker to view visitor data
             </CardDescription>
           </CardHeader>
-          <CardContent class="p-0">
-            <Geomap {parks} onParkClick={handleParkClick}/>
+          <CardContent class="p-0 h-[500px]">
+            <Geomap {parks} {selectedPark} onParkClick={handleParkClick} />
           </CardContent>
         </Card>
 
-        <!-- Heatmap Card -->
+        <!-- Visitor Data Card -->
         <Card>
           <CardHeader>
             <CardTitle>
-              {selectedPark ? selectedPark.properties.Name : 'Select a Park'}
+              {selectedPark ? selectedPark.Name : 'Select a Park'}
             </CardTitle>
             <CardDescription>
-              {#if selectedPark}
-                Visitor patterns from 1980-2021 • {selectedParkData.length} data points
+              {#if selectedParkData.length > 0}
+                Visitor patterns • {selectedParkData.length} data points
               {:else}
                 Click a park marker to view visitor data
               {/if}
@@ -89,10 +94,10 @@
           </CardHeader>
           <CardContent>
             {#if selectedParkData.length > 0}
-              <VisitorChart data={selectedParkData} parkName={selectedPark?.properties.Name || ''} />
+              <VisitorChart data={selectedParkData} />
             {:else}
               <div class="h-[400px] flex items-center justify-center text-gray-500">
-                <p>No visitor data available</p>
+                <p>No visitor data available for this park</p>
               </div>
             {/if}
           </CardContent>
