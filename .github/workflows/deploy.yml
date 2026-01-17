@@ -1,0 +1,59 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - "main"  # Set this to 'master' if your default branch is master
+      - "feature/svelte-dashboard"
+
+# Permissions required for GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    environment: 
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      # Step 1: Download your code
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Step 1.5: Install pnpm 
+      - name: Install pnpm 
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      # Step 2: Install Node.js
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Step 4: Build the SvelteKit app
+      # This runs `vite build` using the adapter-static we set up
+      - name: Build
+        run: pnpm run build
+
+      # Step 5: Upload the 'build' folder to GitHub's artifact storage
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'build/'
+
+      # Step 6: Release to the live internet
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
