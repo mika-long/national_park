@@ -5,6 +5,7 @@
   import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui/card';
   import * as d3 from 'd3';
   import { Heart } from '@lucide/svelte';
+  import { asset } from '$app/paths'; 
 
   let parks: any[] = $state.raw([]);
   let visitData: any[] = $state.raw([]);
@@ -21,8 +22,8 @@
   onMount(async () => {
     try {
       const [parksResponse, visitsResponse] = await Promise.all([
-        fetch('/data/clean_park.csv'),
-        fetch('/data/clean_visit.csv')
+        fetch(asset(`/data/clean_park.csv`)),
+        fetch(asset(`/data/clean_visit.csv`))
       ]);
 
       const parksCsvText = await parksResponse.text();
