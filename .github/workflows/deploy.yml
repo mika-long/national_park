@@ -20,21 +20,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Step 1.5: Install pnpm 
+      - name: Install pnpm 
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       # Step 2: Install Node.js
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: 'pnpm'
 
       # Step 3: Install dependencies
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       # Step 4: Build the SvelteKit app
       # This runs `vite build` using the adapter-static we set up
       - name: Build
-        run: npm run build
+        run: pnpm run build
 
       # Step 5: Upload the 'build' folder to GitHub's artifact storage
       - name: Upload Pages artifact
