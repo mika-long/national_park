@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Plot, Cell, Line, HTMLTooltip } from 'svelteplot';
-  import Slider from './ui/slider/slider.svelte';
+  import { Slider } from "$lib/components/ui/slider";
 
   interface VisitorChartProps { 
     data: any[];
@@ -10,12 +10,31 @@
   
   let viewMode: 'line' | 'heatmap' = $state('heatmap');
   
-  // Transform data for line chart
+  // Compute min/max year from data
+  let years = $derived(data.map(d => d.Year));
+  const minYear = $derived(years.length ? Math.min(...years): 1970);
+  const maxYear = $derived(years.length? Math.max(...years) : 2024);
+
+  // State for selected year range
+  let yearRange = $state([1970, 2024]);
+
+  $effect(() => {
+    // If we have real data boundaries, update the range to match them
+    if (years.length > 0) {
+        // Only update if we are still at the default/fallback state
+        // (This prevents resetting user selection on minor updates)
+        yearRange = [minYear, maxYear];
+    }
+  });
+
+  // Transform data for line chart and filter by year range
   let lineData = $derived(
-    data.map(d => ({
-      ...d,
-      date: `${d.Year}-${String(d.Month).padStart(2, '0')}`
-    }))
+    data
+      .map(d => ({
+        ...d,
+        date: `${d.Year}-${String(d.Month).padStart(2, '0')}`
+      }))
+      .filter(d => d.Year >= yearRange[0] && d.Year <= yearRange[1])
   );
 </script>
 
@@ -40,9 +59,13 @@
     <!-- Visualization -->
     {#if viewMode === 'line'}
       {#key 'line-chart'}
-        <!-- <Slider max={100} step={1} class="max-w-[70%]" type="multiple"/> -->
+        <div class="flex items-center gap-4 mb-2">
+          <span class="font-medium">Year Range:</span>
+          <span >{yearRange[0]}</span>
+          <Slider min={minYear} max={maxYear} step={1} type="multiple" bind:value={yearRange} class="max-w-[50%]" />
+          <span >{yearRange[1]}</span>
+        </div>
         <Plot y={{grid: false, axis: 'both'}} x={{tickRotate: -45, tickSpacing: 100}}>
-          <!-- <Line canvas={true} data={lineData} x="Month" y="RecreationVisits" z="Year"/> -->
           <Line canvas={true} data={lineData} x="date" y="RecreationVisits"/>
             {#snippet overlay()}
               <HTMLTooltip
