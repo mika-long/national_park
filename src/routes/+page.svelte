@@ -4,6 +4,7 @@
   import VisitorChart from '$lib/components/VisitorChart.svelte';
   import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui/card';
   import * as d3 from 'd3';
+  import { Heart } from '@lucide/svelte';
 
   let parks: any[] = $state.raw([]);
   let visitData: any[] = $state.raw([]);
@@ -55,7 +56,8 @@
 
 <div class="min-h-screen bg-gray-50 p-8">
   <div class="container mx-auto max-w-7xl">
-    <h1 class="text-4xl font-bold mb-8">National Parks Visit Data Dashboard</h1>
+    <h1 class="text-4xl font-bold mb-2 underline decoration-gray-300 underline-offset-4">National Parks Visit Data Dashboard</h1>
+    <p class="mb-8 text-gray-600">A quick look at monthly visitation across U.S. national parks.</p>
 
     {#if loading}
       <Card>
@@ -64,6 +66,11 @@
         </CardContent>
       </Card>
     {:else}
+      <div class="mb-6 text-gray-600">
+        <p>
+          Explore visitor trends across U.S. national parks. Use the map to select a park, then view monthly visitation. Switch between line and heatmap views to compare seasonal patterns.
+        </p>
+      </div>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Map Card -->
         <Card>
@@ -104,5 +111,10 @@
         </Card>
       </div>
     {/if}
+    <footer class="mt-12 border-t pt-6 text-sm text-gray-500">
+      <p>
+        Made with <Heart  fill="gray" class="inline align-text-bottom size-4 text-sm text-gray-500" /> by <span class="font-medium">Sheng Long</span> • Built with <a href="https://www.shadcn-svelte.com/" class="hover:underline font-medium">shadcn-svelte</a>, <a href="https://svelteplot.dev/" class="hover:underline font-medium">SveltePlot</a>, and <a href="https://mapcn-svelte.vercel.app/" class="hover:underline font-medium">mapcn-svelte</a>.
+      </p>
+    </footer>
   </div>
 </div>

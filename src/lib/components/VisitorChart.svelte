@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Plot, Cell, Line, Pointer, Text, Dot, HTMLTooltip } from 'svelteplot';
+  import { Plot, Cell, Line, HTMLTooltip } from 'svelteplot';
+  import Slider from './ui/slider/slider.svelte';
 
   interface VisitorChartProps { 
     data: any[];
@@ -16,10 +17,6 @@
       date: `${d.Year}-${String(d.Month).padStart(2, '0')}`
     }))
   );
-  
-  // COVID-19 date markers
-  const covidStart = "2020-03"; // March 2020
-  const covidAnnotation = [{ date: "2020-03", label: "COVID-19" }];
 </script>
 
 <div class="space-y-4">
@@ -43,6 +40,7 @@
     <!-- Visualization -->
     {#if viewMode === 'line'}
       {#key 'line-chart'}
+        <!-- <Slider max={100} step={1} class="max-w-[70%]" type="multiple"/> -->
         <Plot y={{grid: false, axis: 'both'}} x={{tickRotate: -45, tickSpacing: 100}}>
           <!-- <Line canvas={true} data={lineData} x="Month" y="RecreationVisits" z="Year"/> -->
           <Line canvas={true} data={lineData} x="date" y="RecreationVisits"/>
@@ -65,7 +63,13 @@
     {:else}
       {#key 'heatmap-chart'}
         <div class="relative">
-          <Plot padding={0.1} aspectRatio={1} color={{legend: true, scheme: 'Blues'}} x={{tickRotate: -45}} y={{axis: 'both'}}>
+          <Plot
+            padding={0.1}
+            aspectRatio={1}
+            color={{ legend: true, scheme: 'PuBu', n: 5 }}
+            x={{ tickRotate: -45 }}
+            y={{ axis: 'both' }}
+          >
             <Cell data={data} x="Year" y="Month" fill="RecreationVisits"/>
               {#snippet overlay()}
                 <HTMLTooltip
