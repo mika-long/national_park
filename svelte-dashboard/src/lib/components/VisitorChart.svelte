@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Plot, Cell, Line, RuleX, Text } from 'svelteplot';
+  import { Plot, Cell, Line } from 'svelteplot';
 
   interface VisitorChartProps { 
     data: any[];
@@ -44,15 +44,9 @@
     {#if viewMode === 'line'}
       {#key 'line-chart'}
         <Plot y={{grid: true, axis: 'both'}} x={{tickRotate: -45, tickSpacing: 100}}>
-          <Line canvas={true} data={lineData} x="date" y="RecreationVisits" />
-          <!-- COVID-19 marker line -->
-          <RuleX data={[{date: covidStart}]} x="date" stroke="red" strokeWidth={2} strokeDasharray="5,5" />
+          <!-- <Line canvas={true} data={lineData} x="Month" y="RecreationVisits" z="Year"/> -->
+           <Line canvas={true} data={lineData} x="date" y="RecreationVisits"/>
         </Plot>
-        <!-- COVID-19 label below chart -->
-        <div class="flex items-center gap-2 text-sm text-red-600">
-          <div class="w-8 h-0.5 bg-red-600 border-dashed"></div>
-          <span>COVID-19 Pandemic (March 2020)</span>
-        </div>
       {/key}
     {:else}
       {#key 'heatmap-chart'}
@@ -60,11 +54,6 @@
           <Plot grid padding={0.1} aspectRatio={1} color={{legend: true, scheme: 'Blues'}} x={{tickRotate: -45}} y={{axis: 'both'}}>
             <Cell data={data} x="Year" y="Month" fill="RecreationVisits"/>
           </Plot>
-          <!-- COVID-19 overlay annotation for heatmap -->
-          <div class="absolute top-4 right-4 bg-red-50 border-2 border-red-300 px-3 py-2 rounded shadow-sm">
-            <div class="text-xs font-semibold text-red-700">COVID-19 Impact</div>
-            <div class="text-xs text-red-600">March 2020 →</div>
-          </div>
         </div>
       {/key}
     {/if}
