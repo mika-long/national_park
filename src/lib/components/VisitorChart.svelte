@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Plot, Cell, Line } from 'svelteplot';
+  import { Plot, Cell, Line, Pointer, Text, Dot, HTMLTooltip } from 'svelteplot';
 
   interface VisitorChartProps { 
     data: any[];
@@ -43,16 +43,43 @@
     <!-- Visualization -->
     {#if viewMode === 'line'}
       {#key 'line-chart'}
-        <Plot y={{grid: true, axis: 'both'}} x={{tickRotate: -45, tickSpacing: 100}}>
+        <Plot y={{grid: false, axis: 'both'}} x={{tickRotate: -45, tickSpacing: 100}}>
           <!-- <Line canvas={true} data={lineData} x="Month" y="RecreationVisits" z="Year"/> -->
-           <Line canvas={true} data={lineData} x="date" y="RecreationVisits"/>
+          <Line canvas={true} data={lineData} x="date" y="RecreationVisits"/>
+            {#snippet overlay()}
+              <HTMLTooltip
+                data={lineData}
+                x="date"
+                y="RecreationVisits"
+              >
+                {#snippet children({ datum })}
+                  <div class="tooltip">
+                    <div>Date: {datum.date}</div>
+                    <div># Visits: {datum.RecreationVisits}</div>
+                  </div>
+                {/snippet}
+              </HTMLTooltip>
+            {/snippet}
         </Plot>
       {/key}
     {:else}
       {#key 'heatmap-chart'}
         <div class="relative">
-          <Plot grid padding={0.1} aspectRatio={1} color={{legend: true, scheme: 'Blues'}} x={{tickRotate: -45}} y={{axis: 'both'}}>
+          <Plot padding={0.1} aspectRatio={1} color={{legend: true, scheme: 'Blues'}} x={{tickRotate: -45}} y={{axis: 'both'}}>
             <Cell data={data} x="Year" y="Month" fill="RecreationVisits"/>
+              {#snippet overlay()}
+                <HTMLTooltip
+                  data={data}
+                  x="Year"
+                  y="Month"
+                >
+                  {#snippet children({ datum })}
+                    <div class="tooltip">
+                      <div># Visits: {datum.RecreationVisits}</div>
+                    </div>
+                  {/snippet}
+                </HTMLTooltip>
+              {/snippet}
           </Plot>
         </div>
       {/key}
@@ -63,3 +90,18 @@
     </div>
   {/if}
 </div>
+
+<style>
+  .tooltip {
+    background: rgba(255, 255, 255, 0.95);
+    color: #1f2937;
+    padding: 8px 12px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    font-size: 13px;
+    font-family: system-ui, -apple-system, sans-serif;
+    line-height: 1.5;
+    pointer-events: none;
+  }
+</style>

@@ -1,5 +1,6 @@
 <script lang="ts">
     import { Map, MapMarker, MarkerContent, MarkerTooltip, MapControls } from '$lib/components/ui/map';
+    import { MapPin } from '@lucide/svelte';
 
     interface GeomapProps {
         parks: any[];
@@ -25,10 +26,14 @@
         {#each parks as park}
             <MapMarker longitude={park.long} latitude={park.lat}>
                 <MarkerContent>
-                    <button 
-                        onclick={() => onParkClick?.(park)}
-                        class="rounded-full w-3 h-3 {selectedPark?.Code === park.Code ? 'bg-red-500' : 'bg-blue-500'} hover:scale-125 transition-transform"
-                    ></button>
+                    <button onclick={() => onParkClick?.(park)}>
+                        <MapPin 
+                            class={selectedPark?.Code === park.Code ? 'text-red-500' : 'text-blue-500'}
+                            fill={selectedPark?.Code === park.Code ? 'currentColor' : 'none'}
+                            size={24}
+                            strokeWidth={2}
+                        />
+                    </button>
                 </MarkerContent>
                 <MarkerTooltip>
                     <div class="font-semibold">{park.Name}</div>
