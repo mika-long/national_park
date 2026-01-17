@@ -56,7 +56,7 @@
 
 <div class="min-h-screen bg-gray-50 p-8">
   <div class="container mx-auto max-w-7xl">
-    <h1 class="text-4xl font-bold mb-2 underline decoration-gray-300 underline-offset-4">National Parks Visit Data Dashboard</h1>
+    <h1 class="text-4xl font-bold mb-2 underline decoration-gray-300 underline-offset-4">National Parks Visit Data Visualized</h1>
     <p class="mb-8 text-gray-600">A quick look at monthly visitation across U.S. national parks.</p>
 
     {#if loading}
@@ -66,9 +66,13 @@
         </CardContent>
       </Card>
     {:else}
-      <div class="mb-6 text-gray-600">
+      <div class="mb-6 text-gray-600 space-y-3">
         <p>
           Explore visitor trends across U.S. national parks. Use the map to select a park, then view monthly visitation. Switch between line and heatmap views to compare seasonal patterns.
+        </p>
+
+        <p>
+          The original dataset is obtained from <a href="https://www.responsible-datasets-in-context.com/posts/np-data/" class='underline font-medium'> this notebook</a>.
         </p>
       </div>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
