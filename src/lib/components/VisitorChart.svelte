@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Plot, Cell, Line, HTMLTooltip, densityX, AreaY } from 'svelteplot';
   import { Slider } from "$lib/components/ui/slider";
+    import { Diameter } from '@lucide/svelte';
 
   interface VisitorChartProps { 
     data: any[];
@@ -19,6 +20,11 @@
 
   // State for selected year range
   let yearRange = $state([1970, 2024]);
+
+  // State of the container width 
+  let clientWidth = $state(500);
+  const heatmap_x = $derived(clientWidth < 500 ? 'y' : 'x')
+  const heatmap_y = $derived(clientWidth < 500 ? 'x' : 'y')
 
   $effect(() => {
     // If we have real data boundaries, update the range to match them
@@ -67,13 +73,14 @@
     <!-- Visualization -->
     {#if viewMode === 'line'}
       {#key 'line-chart'}
+        <!-- Slider for specifying year range -->
         <div class="flex items-center gap-4 mb-2">
           <span class="font-medium">Year Range:</span>
           <span >{yearRange[0]}</span>
           <Slider min={minYear} max={maxYear} step={1} type="multiple" bind:value={yearRange} class="max-w-[50%]" />
           <span >{yearRange[1]}</span>
         </div>
-        <Plot y={{grid: false, axis: 'both'}} x={{tickRotate: -45, tickSpacing: 100}}>
+        <Plot y={{grid: false, axis: 'both'}} x={{label: "Year - Month", tickRotate: -45, tickSpacing: 100,}}>
           <Line canvas={true} data={lineData} x="date" y="RecreationVisits"/>
             {#snippet overlay()}
               <HTMLTooltip
@@ -93,15 +100,29 @@
       {/key}
     {:else if viewMode === 'heatmap'}
       {#key 'heatmap-chart'}
-        <div class="relative">
+        <div bind:clientWidth>
           <Plot
             padding={0.1}
-            aspectRatio={1}
+            aspectRatio={clientWidth < 500 ? 2 : 1}
             color={{ legend: true, scheme: 'PuBu', n: 5 }}
-            x={{ tickRotate: -45 }}
-            y={{ axis: 'both' }}
+            {...{
+              [heatmap_x]: {
+                // axis: clientWidth < 600 ? "left" : "bottom", // Years on left (mobile) or bottom (desktop)
+                label: "Year"
+              },
+              [heatmap_y]: {
+                // axis: clientWidth < 600 ? "top" : "left",   // Months on top (mobile) or left (desktop)
+                // domain: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], // Keep order correct
+                label: null
+              }
+            }}
           >
-            <Cell data={data} x="Year" y="Month" fill="RecreationVisits"/>
+            <Cell data={data} fill="RecreationVisits"
+              {...{
+                [heatmap_x]: "Year", 
+                [heatmap_y]: "Month"
+              }}
+            />
               {#snippet overlay()}
                 <HTMLTooltip
                   data={data}
@@ -120,20 +141,18 @@
       {/key}
   {:else if viewMode === 'ridgeplot'}
     {#key 'ridgeplot-chart'}
-      <div class='relative'>
-        <Plot
-          x = {{ label: 'Number of Visit'}}
-          y = {{ label: 'Density', axis: false}}
-        >
-          {@const densityData = densityX({
-            data: data,
-            x: "RecreationVisits", 
-            fy: "Month"
-          }, { channel: 'y' })}
-          <AreaY {...densityData} fill="#69b3a2" fillOpacity={0.7} curve="basis"/>
-          <Line {...densityData} stroke="black" strokeWidth={1} curve="basis" />
-        </Plot>
-      </div>
+      <Plot
+        x = {{ label: 'Number of Visit'}}
+        y = {{ label: 'Density', axis: false}}
+      >
+        {@const densityData = densityX({
+          data: data,
+          x: "RecreationVisits", 
+          fy: "Month"
+        }, { channel: 'y' })}
+        <AreaY {...densityData} fill="#69b3a2" fillOpacity={0.7} curve="basis"/>
+        <Line {...densityData} stroke="black" strokeWidth={1} curve="basis" />
+      </Plot>
     {/key}
   {:else}
     <div class="h-96 flex items-center justify-center text-gray-500">
