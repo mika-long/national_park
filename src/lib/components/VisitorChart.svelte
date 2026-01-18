@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Plot, Cell, Line, HTMLTooltip } from 'svelteplot';
+  import { Plot, Cell, Line, HTMLTooltip, densityX, AreaY } from 'svelteplot';
   import { Slider } from "$lib/components/ui/slider";
 
   interface VisitorChartProps { 
@@ -7,8 +7,10 @@
   }
 
   let { data } : VisitorChartProps = $props(); 
+
+  $inspect(data);
   
-  let viewMode: 'line' | 'heatmap' = $state('heatmap');
+  let viewMode: 'line' | 'heatmap' | 'ridgeplot' = $state('heatmap');
   
   // Compute min/max year from data
   let years = $derived(data.map(d => d.Year));
@@ -44,15 +46,21 @@
     <div class="flex gap-2">
       <button
         onclick={() => viewMode = 'line'}
-        class="px-4 py-2 rounded text-sm {viewMode === 'line' ? 'bg-blue-500 text-white' : 'bg-gray-200'}"
+        class="px-4 py-2 rounded text-sm {viewMode === 'line' ? 'bg-teal-500 text-white' : 'bg-gray-200'}"
       >
         Line Chart
       </button>
       <button
         onclick={() => viewMode = 'heatmap'}
-        class="px-4 py-2 rounded text-sm {viewMode === 'heatmap' ? 'bg-blue-500 text-white' : 'bg-gray-200'}"
+        class="px-4 py-2 rounded text-sm {viewMode === 'heatmap' ? 'bg-teal-500 text-white' : 'bg-gray-200'}"
       >
         Heatmap
+      </button>
+      <button
+        onclick={() => viewMode = 'ridgeplot'}
+        class="px-4 py-2 rounded text-sm {viewMode === 'ridgeplot' ? 'bg-teal-500 text-white' : 'bg-gray-200'}"
+      >
+        Ridge Plot 
       </button>
     </div>
 
@@ -83,7 +91,7 @@
             {/snippet}
         </Plot>
       {/key}
-    {:else}
+    {:else if viewMode === 'heatmap'}
       {#key 'heatmap-chart'}
         <div class="relative">
           <Plot
@@ -110,12 +118,29 @@
           </Plot>
         </div>
       {/key}
-    {/if}
+  {:else if viewMode === 'ridgeplot'}
+    {#key 'ridgeplot-chart'}
+      <div class='relative'>
+        <Plot
+          x = {{ label: 'Number of Visit'}}
+          y = {{ label: 'Density', axis: false}}
+        >
+          {@const densityData = densityX({
+            data: data,
+            x: "RecreationVisits", 
+            fy: "Month"
+          }, { channel: 'y' })}
+          <AreaY {...densityData} fill="#69b3a2" fillOpacity={0.7} curve="basis"/>
+          <Line {...densityData} stroke="black" strokeWidth={1} curve="basis" />
+        </Plot>
+      </div>
+    {/key}
   {:else}
     <div class="h-96 flex items-center justify-center text-gray-500">
       <p>No visitor data available</p>
     </div>
   {/if}
+{/if}
 </div>
 
 <style>
