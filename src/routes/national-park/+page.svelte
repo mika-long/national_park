@@ -13,7 +13,7 @@
   let selectedPark: any = $state(null);
   let loading = $state(true);
 
-  const sourceUrl = "https://github.com/mika-long/vis-gallery/blob/main/src/routes/moon-phase/MoonPhase.svelte";
+  const sourceUrl = "https://github.com/mika-long/vis-gallery/blob/main/src/routes/national-park";
   
   // Filtered data for selected park
   let selectedParkData = $derived(

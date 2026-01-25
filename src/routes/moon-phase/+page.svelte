@@ -2,7 +2,7 @@
     import VisPage from "$lib/components/VisPage.svelte";
     import MoonPhase from "$lib/components/MoonPhase.svelte";
 
-    const sourceUrl = "https://github.com/mika-long/vis-gallery/blob/main/src/routes/moon-phase/MoonPhase.svelte";
+    const sourceUrl = "https://github.com/mika-long/vis-gallery/blob/main/src/routes/moon-phase/";
 </script>
 
 <VisPage {sourceUrl} title="Moon Phases">
