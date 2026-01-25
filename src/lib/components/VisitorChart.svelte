@@ -2,6 +2,7 @@
   import { Plot, Cell, Line, HTMLTooltip, densityX, AreaY } from 'svelteplot';
   import { Slider } from "$lib/components/ui/slider";
     import { Diameter } from '@lucide/svelte';
+    import { tickFormat } from 'd3';
 
   interface VisitorChartProps { 
     data: any[];
@@ -103,12 +104,13 @@
         <div bind:clientWidth>
           <Plot
             padding={0.1}
-            aspectRatio={clientWidth < 500 ? 2 : 1}
+            aspectRatio={clientWidth < 500 ? 3.5 : 1}
             color={{ legend: true, scheme: 'PuBu', n: 5 }}
             {...{
               [heatmap_x]: {
                 // axis: clientWidth < 600 ? "left" : "bottom", // Years on left (mobile) or bottom (desktop)
-                label: "Year"
+                label: "Year",
+                tickRotate: -45 
               },
               [heatmap_y]: {
                 // axis: clientWidth < 600 ? "top" : "left",   // Months on top (mobile) or left (desktop)
