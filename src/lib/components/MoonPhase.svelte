@@ -23,7 +23,7 @@
     });
 
     // radius 
-    const r = 40;
+    const r = 10;
 
     let start = $derived(d3.utcYear(new Date(Date.UTC(year, 0, 1))));
     let days = $derived(d3.utcDays(start, d3.utcYear.offset(start)));
@@ -50,15 +50,20 @@
         };
     }));
 
+    // option for radial data 
+    let radialData = $derived(data.map((d, i) => {
+        const angle = (d.gridY / 12) * 2 * Math.PI; // month -> angle 
+        const radius = d.gridX * 10; // day of month --> radius 
+        const [x, y] = d3.pointRadial(angle, radius); 
+        return {...d, x, y}; 
+    }))
+
+
     const hemisphere = d3.geoCircle()(); 
     const projection = d3.geoOrthographic().translate([0, 0]); 
     const shapeMoon = {
-        draw(context: CanvasRenderingContext2D, l: number, arg3: number, radius: number) {
-            console.log(`context ${context}`); 
-            console.log(`l ${l}`); 
-            console.log(`arg3 ${arg3}`);
-            console.log(`radius ${radius}`);
-            projection.rotate([l, 0]).scale(radius); 
+        draw(context: CanvasRenderingContext2D, l: number, radius: number) {
+            projection.rotate([l, 0]).scale(r); 
             const path = d3.geoPath(projection, context); 
             path(hemisphere);
         }
@@ -82,6 +87,7 @@
 
 <div class="mx-[-14px] bg-[#111] text-white uppercase max-w-[1152px] w-[calc(100%+28px)] center">
     <Plot
+        title={year + " PHASES OF THE MOON"}
         aspectRatio={0.6}
         marginLeft={70}
         marginBottom={30}
@@ -92,7 +98,7 @@
     >
         <Dot {data} x="gridX" y="gridY" fill="#333" r={r}/>
         <Text {data} x="gridX" y="gridY" text="dayOfMonth" fontSize={7} dy={-r-5}/>
-        <Vector {data} x="gridX" y="gridY" length="phaseAngle" anchor="start" fill="#fff" radius={12} shape={shapeMoon}/>
-        <AxisY textAnchor="start" tickSize={0} dx={-50} tickFormat={(d) => formatMonth(Number(d))} />
+        <Vector {data} x="gridX" y="gridY" length="phaseAngle" anchor="start" fill="#fff" r={12} shape={shapeMoon}/>
+        <AxisY textAnchor="start" tickSize={0} dx={-50} tickFormat={(d) => formatMonth(Number(d))} />        
     </Plot>
 </div>

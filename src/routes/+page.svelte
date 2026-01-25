@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { base } from '$app/paths';
+    import { resolve } from '$app/paths'; 
 
     const projects = [
         {
@@ -21,7 +21,7 @@
 <div class="max-w-4xl mx-auto px-6 py-12">
     <!-- Header -->
     <header class="mb-12">
-        <h1 class="text-4xl font-bold text-gray-900 mb-3">Visualization Gallery</h1>
+        <h1 class="text-4xl font-bold text-gray-900 mb-3">Visualization <span class="line-through">side-project</span> Gallery</h1>
         <p class="text-gray-600 text-lg max-w-2xl">
             A collection of interactive data visualizations built with Svelte and SveltePlot. 
             Each project includes source code and explanations.
@@ -32,7 +32,7 @@
     <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
         {#each projects as project}
             <a 
-                href="{base}/{project.slug}" 
+                href={`/${project.slug}`}
                 class="group block p-6 border border-gray-200 rounded-lg hover:border-teal-400 hover:shadow-md transition"
             >
                 <h2 class="text-xl font-semibold text-gray-900 group-hover:text-teal-700 mb-2">
