@@ -23,7 +23,7 @@
     });
 
     // radius 
-    const r = 12; 
+    const r = 40;
 
     let start = $derived(d3.utcYear(new Date(Date.UTC(year, 0, 1))));
     let days = $derived(d3.utcDays(start, d3.utcYear.offset(start)));
@@ -53,8 +53,12 @@
     const hemisphere = d3.geoCircle()(); 
     const projection = d3.geoOrthographic().translate([0, 0]); 
     const shapeMoon = {
-        draw(context: CanvasRenderingContext2D, length: number, r: number) {
-            projection.rotate([length, 0]).scale(12); 
+        draw(context: CanvasRenderingContext2D, l: number, arg3: number, radius: number) {
+            console.log(`context ${context}`); 
+            console.log(`l ${l}`); 
+            console.log(`arg3 ${arg3}`);
+            console.log(`radius ${radius}`);
+            projection.rotate([l, 0]).scale(radius); 
             const path = d3.geoPath(projection, context); 
             path(hemisphere);
         }
@@ -82,14 +86,13 @@
         marginLeft={70}
         marginBottom={30}
         marginTop={40}
-        width={1152}
         x={{domain: d3.range(1, 40), axis: undefined}} 
         y={{domain: d3.range(12), label: "", reverse: true}}
         length={{domain: [0, 360], range: [0, 360]}}
     >
-        <Dot {data} x="gridX" y="gridY" fill="#333" {r}/>
+        <Dot {data} x="gridX" y="gridY" fill="#333" r={r}/>
         <Text {data} x="gridX" y="gridY" text="dayOfMonth" fontSize={7} dy={-r-5}/>
-        <Vector {data} x="gridX" y="gridY" length="phaseAngle" anchor="start" fill="#fff" {r} shape={shapeMoon}/>
+        <Vector {data} x="gridX" y="gridY" length="phaseAngle" anchor="start" fill="#fff" radius={12} shape={shapeMoon}/>
         <AxisY textAnchor="start" tickSize={0} dx={-50} tickFormat={(d) => formatMonth(Number(d))} />
     </Plot>
 </div>

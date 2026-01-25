@@ -57,8 +57,8 @@
 
 <VisPage {sourceUrl} title="National Parks Visit Data">
   {#snippet description()}
-    <p class="mb-8 text-gray-600">A quick look at monthly visitation across U.S. national parks.</p>
-    <div class="mb-6 text-gray-600 space-y-3">
+    <p class="mb-3 text-gray-700">A quick look at monthly visitation across U.S. national parks.</p>
+    <div class="mb-3 text-sm text-gray-600 space-y-3">
         <p>
           Explore visitor trends across U.S. national parks. Use the map to select a park, then view monthly visitation. Switch between line and heatmap views to compare seasonal patterns.
         </p>
