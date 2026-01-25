@@ -17,10 +17,10 @@ const config = {
 			fallback: '404.html'
 		}),
 		paths: {
-			base: process.env.NODE_ENV === 'production' ? '/national_park' : '', 
+			base: process.env.NODE_ENV === 'production' ? '/vis-gallery' : '', 
 		},
 		alias: {
-			"@/*": ".path/to/lib/*",
+			"@/*": "./src/lib/*", 
 		}
 	}
 };

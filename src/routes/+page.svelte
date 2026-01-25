@@ -16,6 +16,9 @@
         }
         // Add more projects here
     ];
+
+    // create a helper functino that bypases strict typing 
+    const link = (path: string) => resolve(path as any); 
 </script>
 
 <div class="max-w-4xl mx-auto px-6 py-12">
@@ -32,13 +35,13 @@
     <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
         {#each projects as project}
             <a 
-                href={`/${project.slug}`}
+                href={link(`/${project.slug}`)}
                 class="group block p-6 border border-gray-200 rounded-lg hover:border-teal-400 hover:shadow-md transition"
             >
                 <h2 class="text-xl font-semibold text-gray-900 group-hover:text-teal-700 mb-2">
                     {project.title}
                 </h2>
-                <p class="text-gray-600 text-sm mb-4">
+                <p class="text-gray-a600 text-sm mb-4">
                     {project.description}
                 </p>
                 <div class="flex flex-wrap gap-2">
