@@ -1,125 +1,62 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import Geomap from '$lib/components/Geomap.svelte';
-  import VisitorChart from '$lib/components/VisitorChart.svelte';
-  import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui/card';
-  import * as d3 from 'd3';
-  import { Heart } from '@lucide/svelte';
-  import { asset } from '$app/paths'; 
+    import { base } from '$app/paths';
 
-  let parks: any[] = $state.raw([]);
-  let visitData: any[] = $state.raw([]);
-  let selectedPark: any = $state(null);
-  let loading = $state(true);
-
-  // Filtered data for selected park
-  let selectedParkData = $derived(
-    selectedPark 
-      ? visitData.filter(d => d.UnitCode === selectedPark.Code)
-      : []
-  );
-
-  onMount(async () => {
-    try {
-      const [parksResponse, visitsResponse] = await Promise.all([
-        fetch(asset(`/data/clean_park.csv`)),
-        fetch(asset(`/data/clean_visit.csv`))
-      ]);
-
-      const parksCsvText = await parksResponse.text();
-      parks = d3.csvParse(parksCsvText, d3.autoType);
-      
-      const csvText = await visitsResponse.text();
-      visitData = d3.csvParse(csvText, d3.autoType);
-      
-      // Debug: Check column names and first row
-      console.log('Visit data columns:', Object.keys(visitData[0] || {}));
-      console.log('Visit data first row:', visitData[0]);
-
-      // Default to first park (or Yosemite if available)
-      const yosemite = parks.find(p => p.Code === 'YOSE');
-      selectedPark = yosemite || parks[0];
-
-      loading = false;
-    } catch (error) {
-      console.error('Error loading data:', error);
-      loading = false;
-    }
-  });
-
-  // $inspect(parks); 
-  // $inspect(visitData); 
-
-  function handleParkClick(park: any) {
-    selectedPark = park;
-  }
+    const projects = [
+        {
+            slug: 'moon-phase',
+            title: 'Moon Phases',
+            description: 'Lunar illumination calendar showing the moon\'s phase for every day of the year.',
+            tags: ['SveltePlot', 'D3', 'SunCalc']
+        },
+        {
+            slug: 'national-park',
+            title: 'National Parks',
+            description: 'Interactive visualization of U.S. National Park visitor data from 1979–2024.',
+            tags: ['SveltePlot', 'MapLibre', 'shadcn-svelte']
+        }
+        // Add more projects here
+    ];
 </script>
 
-<div class="min-h-screen bg-gray-50 p-8">
-  <div class="container mx-auto max-w-7xl">
-    <h1 class="text-4xl font-bold mb-2 underline decoration-gray-300 underline-offset-4">National Parks Visit Data Visualized</h1>
-    <p class="mb-8 text-gray-600">A quick look at monthly visitation across U.S. national parks.</p>
-
-    {#if loading}
-      <Card>
-        <CardContent class="p-12">
-          <p class="text-center text-lg">Loading data...</p>
-        </CardContent>
-      </Card>
-    {:else}
-      <div class="mb-6 text-gray-600 space-y-3">
-        <p>
-          Explore visitor trends across U.S. national parks. Use the map to select a park, then view monthly visitation. Switch between line and heatmap views to compare seasonal patterns.
+<div class="max-w-4xl mx-auto px-6 py-12">
+    <!-- Header -->
+    <header class="mb-12">
+        <h1 class="text-4xl font-bold text-gray-900 mb-3">Visualization Gallery</h1>
+        <p class="text-gray-600 text-lg max-w-2xl">
+            A collection of interactive data visualizations built with Svelte and SveltePlot. 
+            Each project includes source code and explanations.
         </p>
+    </header>
 
+    <!-- Project grid -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {#each projects as project}
+            <a 
+                href="{base}/{project.slug}" 
+                class="group block p-6 border border-gray-200 rounded-lg hover:border-teal-400 hover:shadow-md transition"
+            >
+                <h2 class="text-xl font-semibold text-gray-900 group-hover:text-teal-700 mb-2">
+                    {project.title}
+                </h2>
+                <p class="text-gray-600 text-sm mb-4">
+                    {project.description}
+                </p>
+                <div class="flex flex-wrap gap-2">
+                    {#each project.tags as tag}
+                        <span class="text-xs px-2 py-1 bg-teal-50 text-teal-700 rounded">
+                            {tag}
+                        </span>
+                    {/each}
+                </div>
+            </a>
+        {/each}
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 border-t border-gray-200 text-sm text-gray-500">
         <p>
-          The original dataset is obtained from <a href="https://www.responsible-datasets-in-context.com/posts/np-data/" class='underline font-medium'> this notebook</a>.
+            Built by <a href="https://github.com/mika-long" target="_blank" class="underline hover:text-teal-600">Sheng Long</a> · 
+            <a href="https://github.com/mika-long/vis-gallery" target="_blank" class="underline hover:text-teal-600">View on GitHub</a>
         </p>
-      </div>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Map Card -->
-        <Card>
-          <CardHeader>
-            <CardTitle>National Parks Map</CardTitle>
-            <CardDescription>
-              {parks.length} parks loaded • Click a marker to view visitor data
-            </CardDescription>
-          </CardHeader>
-          <CardContent class="p-0 h-[500px]">
-            <Geomap {parks} {selectedPark} onParkClick={handleParkClick} />
-          </CardContent>
-        </Card>
-
-        <!-- Visitor Data Card -->
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {selectedPark ? selectedPark.Name : 'Select a Park'}
-            </CardTitle>
-            <CardDescription>
-              {#if selectedParkData.length > 0}
-                Visitor patterns • {selectedParkData.length} data points
-              {:else}
-                Click a park marker to view visitor data
-              {/if}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {#if selectedParkData.length > 0}
-              <VisitorChart data={selectedParkData} />
-            {:else}
-              <div class="h-[400px] flex items-center justify-center text-gray-500">
-                <p>No visitor data available for this park</p>
-              </div>
-            {/if}
-          </CardContent>
-        </Card>
-      </div>
-    {/if}
-    <footer class="mt-12 border-t pt-6 text-sm text-gray-500">
-      <p>
-        Made with <Heart  fill="gray" class="inline align-text-bottom size-4 text-sm text-gray-500" /> by <span class="font-medium">Sheng Long</span> • Built with <a href="https://www.shadcn-svelte.com/" class="hover:underline font-medium">shadcn-svelte</a>, <a href="https://svelteplot.dev/" class="hover:underline font-medium">SveltePlot</a>, and <a href="https://mapcn-svelte.vercel.app/" class="hover:underline font-medium">mapcn-svelte</a>.
-      </p>
     </footer>
-  </div>
 </div>

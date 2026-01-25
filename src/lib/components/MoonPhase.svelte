@@ -1,6 +1,7 @@
 <script lang="ts">
     import {Plot, Dot, Text, Vector, AxisY} from 'svelteplot';
-    import * as SunCalc from 'suncalc'; 
+    import pkg from 'suncalc'; 
+    const { getMoonIllumination } = pkg;
     import * as d3 from 'd3'; 
     
     let year = $state(2026); 
@@ -36,7 +37,8 @@
         const gridY = d.getUTCMonth(); 
         // Moon phase calculation 
         const noon = d3.utcHour.offset(d, 12); 
-        const illum = SunCalc.getMoonIllumination(noon); 
+        // const illum = SunCalc.getMoonIllumination(noon); 
+        const illum = getMoonIllumination(noon); 
         const phaseAngle = 180 - illum.phase * 360; 
 
         return {
@@ -58,23 +60,23 @@
         }
     }
 
+    //  function for formatting the month 
     let formatMonth = $derived((monthIndex: number) => {
         const date = new Date(2026, monthIndex, 1);
-        // The native Intl API handles the translation automatically
         return date.toLocaleString(debouncedLoc, { month: "long" });
     });
 </script>
 
-<div style="margin-bottom: 20px; font-family: system-ui; display: flex; gap: 20px; justify-content: center ">
-    <label>
-        Year: <input  style="font-family: system-ui" type="number" bind:value={year}/>
+<div class="flex gap-6 mb-4">
+    <label class="flex items-center gap-2 text-md">
+        Year: <input class="w-20 px-2 py-1 border rounded bg-white text-gray-900" type="number" bind:value={year}/>
     </label>
-    <label>
-        Locale: <input bind:value={loc} placeholder="e.g., fr-FR, en-US, zh-CN, de-DE"/>
+    <label class="flex items-center gap-2 text-md">
+        Locale: <input class="w-40 px-2 py-1 border rounded bg-white text-gray-900 placeholder:text-gray-400" bind:value={loc} placeholder="e.g., fr-FR, en-US, zh-CN, de-DE, ja-jp"/>
     </label>
 </div>
 
-<div style="margin: 0 -14px; background: #111; color: #fff; max-width: none; text-transform: uppercase; width: calc(100% + 28px)">
+<div class="mx-[-14px] bg-[#111] text-white uppercase max-w-[1152px] w-[calc(100%+28px)] center">
     <Plot
         aspectRatio={0.6}
         marginLeft={70}
